@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMM Panel - User</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  * { font-family: 'Segoe UI', Tahoma, sans-serif; }
+  .fade-in { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .scrollbar::-webkit-scrollbar { width: 6px; }
+  .scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  
+  .bg-brand { background: linear-gradient(135deg, #ff6b35, #f7931e); }
+  .bg-brand-solid { background: #ff6b35; }
+  .text-brand { color: #ff6b35; }
+  .border-brand { border-color: #ff6b35; }
+  .bg-success { background: linear-gradient(135deg, #84cc16, #65a30d); }
+  
+  .icon-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 12px 8px; border-radius: 12px; background: #fff;
+    border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s;
+    min-width: 70px;
+  }
+  .icon-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: #ff6b35; }
+  .icon-btn i { font-size: 24px; margin-bottom: 4px; }
+  .icon-btn span { font-size: 10px; color: #64748b; font-weight: 600; }
+</style>
+</head>
+<body class="bg-orange-50 min-h-screen">
+
+<div id="loading" class="min-h-screen flex items-center justify-center bg-brand">
+  <div class="text-white text-center">
+    <i class="fas fa-spinner fa-spin text-4xl mb-3"></i>
+    <p>Loading...</p>
+  </div>
+</div>
+
+<div id="authPage" class="hidden min-h-screen flex items-center justify-center bg-brand p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="fas fa-rocket text-brand text-2xl"></i>
+      </div>
+      <h1 id="authTitle" class="text-2xl font-bold text-slate-800">User Login</h1>
+      <p class="text-slate-500 text-sm mt-1">SMM Panel</p>
+    </div>
+
+    <div id="authError" class="hidden bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg mb-4"></div>
+
+    <div class="flex gap-2 mb-5 bg-slate-100 p-1 rounded-lg">
+      <button id="tabLogin" onclick="switchAuth('login')" class="flex-1 py-2 rounded-md text-sm font-semibold bg-white shadow">Login</button>
+      <button id="tabRegister" onclick="switchAuth('register')" class="flex-1 py-2 rounded-md text-sm font-semibold text-slate-500">Register</button>
+    </div>
+
+    <form id="loginForm" onsubmit="handleUserLogin(event)">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Username / Email</label>
+        <input id="loginUser" type="text" required placeholder="username"
+          class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-brand focus:outline-none">
+      </div>
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+        <input id="loginPass" type="password" required placeholder="••••••••"
+          class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-brand focus:outline-none">
+      </div>
+      <div class="text-right mb-3">
+        <a href="#" onclick="showForgot(event)" class="text-sm text-brand hover:underline">Forgot Password?</a>
+      </div>
+      <button type="submit" id="loginBtn" class="w-full bg-brand-solid hover:opacity-90 text-white py-3 rounded-lg font-semibold transition">
+        <i class="fas fa-sign-in-alt mr-2"></i>Login
+      </button>
+    </form>
+
+    <form id="registerForm" onsubmit="handleUserRegister(event)" class="hidden">
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Username</label>
+        <input name="username" type="text" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-brand focus:outline-none">
+      </div>
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Email</label>
+        <input name="email" type="email" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-brand focus:outline-none">
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+        <input name="password" type="password" required minlength="6" class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-brand focus:outline-none">
+      </div>
+      <button type="submit" class="w-full bg-brand-solid hover:opacity-90 text-white py-3 rounded-lg font-semibold transition">
+        <i class="fas fa-user-plus mr-2"></i>Register
+      </button>
+    </form>
+
+    <form id="forgotForm" onsubmit="handleForgot(event)" class="hidden">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-slate-700 mb-2">Email address</label>
+        <input name="email" type="email" required class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:border-brand focus:outline-none">
+      </div>
+      <button type="submit" class="w-full bg-brand-solid hover:opacity-90 text-white py-3 rounded-lg font-semibold transition">
+        Send Reset Link
+      </button>
+      <button type="button" onclick="switchAuth('login')" class="w-full mt-3 text-slate-500 text-sm">← Back to Login</button>
+    </form>
+  </div>
+</div>
+
+<div id="userPanel" class="hidden">
+  <header class="bg-brand sticky top-0 z-30 shadow-lg">
+    <div class="flex items-center gap-3 px-4 py-3">
+      <button onclick="toggleSidebar()" class="w-10 h-10 rounded-lg bg-white/20 text-white flex items-center justify-center">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="flex-1"></div>
+      <button class="h-9 px-3 rounded-lg bg-white/20 text-white flex items-center gap-2 text-sm font-semibold">
+        🇧🇩 <span>BDT ৳</span>
+      </button>
+      <button onclick="showUP('profile')" class="h-9 px-3 rounded-lg bg-white/20 text-white flex items-center gap-2 text-sm font-semibold">
+        <i class="fas fa-user-circle"></i>
+        <span class="hidden sm:inline" id="topUsername">User</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex">
+    <aside id="sidebar" class="w-64 bg-white shadow-xl h-[calc(100vh-64px)] overflow-y-auto scrollbar fixed left-0 top-16 z-40 transform -translate-x-full transition-transform duration-300">
+      <div class="p-5 border-b">
+        <h2 class="font-bold text-lg text-slate-800"><i class="fas fa-rocket text-brand mr-2"></i><span id="sidebarTitle">SMM Panel</span></h2>
+        <div class="mt-3 bg-orange-50 rounded-lg p-3">
+          <p class="text-xs text-slate-500">Welcome back</p>
+          <p id="sidebarUser" class="font-semibold text-slate-800"></p>
+          <p id="sidebarBalance" class="text-emerald-600 font-bold text-lg mt-1">৳0</p>
+        </div>
+      </div>
+      <nav class="p-3 space-y-1">
+        <a href="#" onclick="showUP('dashboard')" data-up="dashboard" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-home w-5"></i> Dashboard
+        </a>
+        <a href="#" onclick="showUP('neworder')" data-up="neworder" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-cart-plus w-5"></i> New Order
+        </a>
+        <a href="#" onclick="showUP('myorders')" data-up="myorders" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-box w-5"></i> My Orders
+        </a>
+        <a href="#" onclick="showUP('addfunds')" data-up="addfunds" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-wallet w-5"></i> Add Funds
+        </a>
+        <a href="#" onclick="showUP('transactions')" data-up="transactions" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-credit-card w-5"></i> Transactions
+        </a>
+        <a href="#" onclick="showUP('notifications')" data-up="notifications" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-bell w-5"></i> Notifications
+          <span id="notifDot" class="ml-auto hidden bg-red-500 text-white text-xs rounded-full px-2 py-0.5">New</span>
+        </a>
+        <a href="#" onclick="showUP('support')" data-up="support" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-ticket-alt w-5"></i> Support
+        </a>
+        <a href="#" onclick="showUP('reseller')" data-up="reseller" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-handshake w-5"></i> Reseller
+        </a>
+        <a href="#" onclick="showUP('profile')" data-up="profile" class="up-nav flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-orange-50 transition text-slate-600">
+          <i class="fas fa-user-circle w-5"></i> Profile
+        </a>
+        <a href="#" onclick="userLogout()" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 text-red-500 mt-4">
+          <i class="fas fa-sign-out-alt w-5"></i> Logout
+        </a>
+      </nav>
+    </aside>
+
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
+
+    <main class="flex-1 p-4 lg:p-6">
+      <div id="upContent"></div>
+    </main>
+  </div>
+</div>
+
+<div id="modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-5 right-5 bg-slate-800 text-white px-5 py-3 rounded-lg shadow-xl z-50"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, doc, getDocs, getDoc, setDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAP-FGIMqtUEfB5l2XpQJBzzh0vzJxmEnc",
+  authDomain: "digital-marketing-9a292.firebaseapp.com",
+  projectId: "digital-marketing-9a292",
+  storageBucket: "digital-marketing-9a292.firebasestorage.app",
+  messagingSenderId: "225145075712",
+  appId: "1:225145075712:web:4ba3a063f1ca57635c40e5"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ Payment Numbers এখন Admin Panel থেকে control হবে
+   ═══════════════════════════════════════════════════════════ */
+const SETTINGS_ID = 'SHs2asLtF8dhPipVE4GVvCCTTQC2';
+const SESSION_KEY = 'smm_user_id_v2';
+const LOGIN_TIME_KEY = 'smm_login_time_v2';
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+
+const FS = {
+  async getAll(col) {
+    const snap = await getDocs(collection(db, col));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+  async getOne(col, id) {
+    const snap = await getDoc(doc(db, col, id));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  },
+  async set(col, id, data) { return await setDoc(doc(db, col, id), data, { merge: true }); },
+  async update(col, id, data) { return await updateDoc(doc(db, col, id), data); },
+  async remove(col, id) { return await deleteDoc(doc(db, col, id)); },
+  async findBy(col, field, value) {
+    const q = query(collection(db, col), where(field, '==', value));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+};
+
+let CURRENT_USER = null;
+let SETTINGS = {
+  panel_name: 'SMM Panel',
+  currency: '৳',
+  bkash: '',
+  nagad: '',
+  rocket: '',
+  instruction: ''
+};
+let allServicesCache = [];
+
+window.toast = function(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 2500);
+};
+
+window.toggleSidebar = function() {
+  const s = document.getElementById('sidebar');
+  const o = document.getElementById('sidebarOverlay');
+  s.classList.toggle('-translate-x-full');
+  o.classList.toggle('hidden');
+};
+
+/* ================= SESSION HELPERS ================= */
+function saveSession(userId) {
+  try {
+    localStorage.setItem(SESSION_KEY, userId);
+    localStorage.setItem(LOGIN_TIME_KEY, Date.now().toString());
+  } catch (e) { console.error('Session save failed', e); }
+}
+
+function getSession() {
+  try {
+    const id = localStorage.getItem(SESSION_KEY);
+    const time = localStorage.getItem(LOGIN_TIME_KEY);
+    if (!id || !time) return null;
+    const age = Date.now() - parseInt(time);
+    if (age > SESSION_MAX_AGE) {
+      clearSession();
+      return null;
+    }
+    return id;
+  } catch (e) { return null; }
+}
+
+function clearSession() {
+  try {
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(LOGIN_TIME_KEY);
+  } catch (e) {}
+}
+
+/* ================= INIT ================= */
+async function init() {
+  try {
+    // ✅ Firebase থেকে SETTINGS load (Payment Numbers সহ)
+    const s = await FS.getOne('settings', SETTINGS_ID);
+    if (s) SETTINGS = { ...SETTINGS, ...s };
+
+    document.getElementById('loading').classList.add('hidden');
+
+    const savedUserId = getSession();
+    if (savedUserId) {
+      const u = await FS.getOne('users', savedUserId);
+      if (u && u.status !== 'blocked') {
+        enterUserPanel(u);
+        return;
+      } else {
+        clearSession();
+      }
+    }
+    document.getElementById('authPage').classList.remove('hidden');
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loading').innerHTML = `<div class="text-white text-center p-8">
+      <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+      <p class="font-bold">Firebase Error</p>
+      <p class="text-sm mt-2">${err.message}</p>
+    </div>`;
+  }
+}
+
+function cur() { return SETTINGS.currency || '৳'; }
+
+window.switchAuth = function(mode) {
+  const forms = { login: 'loginForm', register: 'registerForm', forgot: 'forgotForm' };
+  Object.values(forms).forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById(forms[mode]).classList.remove('hidden');
+  document.getElementById('authError').classList.add('hidden');
+
+  const titles = { login: 'User Login', register: 'Create Account', forgot: 'Reset Password' };
+  document.getElementById('authTitle').textContent = titles[mode];
+
+  document.getElementById('tabLogin').className = `flex-1 py-2 rounded-md text-sm font-semibold ${mode === 'login' ? 'bg-white shadow' : 'text-slate-500'}`;
+  document.getElementById('tabRegister').className = `flex-1 py-2 rounded-md text-sm font-semibold ${mode === 'register' ? 'bg-white shadow' : 'text-slate-500'}`;
+};
+
+function authError(msg) {
+  const e = document.getElementById('authError');
+  e.textContent = '❌ ' + msg;
+  e.classList.remove('hidden');
+}
+
+window.handleUserLogin = async function(e) {
+  e.preventDefault();
+  const login = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging in...';
+
+  try {
+    let users = await FS.findBy('users', 'username', login);
+    if (!users.length) users = await FS.findBy('users', 'email', login);
+
+    if (!users.length) { authError('User পাওয়া যায়নি!'); return; }
+    const u = users[0];
+    if (u.password !== pass) { authError('ভুল Password!'); return; }
+    if (u.status === 'blocked') { authError('আপনার account blocked!'); return; }
+
+    saveSession(u.id);
+    enterUserPanel(u);
+  } catch (err) {
+    authError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Login';
+  }
+};
+
+window.handleUserRegister = async function(e) {
+  e.preventDefault();
+  const f = e.target;
+  const username = f.username.value.trim();
+  const email = f.email.value.trim();
+  const password = f.password.value;
+
+  try {
+    const existingU = await FS.findBy('users', 'username', username);
+    if (existingU.length) return authError('Username ইতিমধ্যে ব্যবহৃত!');
+    const existingE = await FS.findBy('users', 'email', email);
+    if (existingE.length) return authError('Email ইতিমধ্যে ব্যবহৃত!');
+
+    const userId = 'user_' + Date.now();
+    await FS.set('users', userId, {
+      username, email, password,
+      balance: 0, status: 'active',
+      joined: new Date().toISOString().slice(0, 10),
+      reseller: false, api_key: ''
+    });
+
+    toast('✅ Registration successful!');
+    switchAuth('login');
+    document.getElementById('loginUser').value = username;
+    document.getElementById('loginPass').value = '';
+  } catch (err) {
+    authError(err.message);
+  }
+};
+
+window.handleForgot = async function(e) {
+  e.preventDefault();
+  const email = e.target.email.value.trim();
+  const users = await FS.findBy('users', 'email', email);
+  if (!users.length) return authError('এই email-এ account নেই!');
+  toast('📧 Reset link sent (demo)');
+  switchAuth('login');
+};
+
+window.userLogout = function() {
+  if (!confirm('Logout করবেন?')) return;
+  clearSession();
+  location.reload();
+};
+
+function enterUserPanel(user) {
+  CURRENT_USER = user;
+  document.getElementById('authPage').classList.add('hidden');
+  document.getElementById('userPanel').classList.remove('hidden');
+  document.getElementById('sidebarTitle').textContent = SETTINGS.panel_name || 'SMM Panel';
+  document.getElementById('topUsername').textContent = user.username;
+  refreshSidebar();
+  showUP('dashboard');
+}
+
+async function refreshSidebar() {
+  const u = await FS.getOne('users', CURRENT_USER.id);
+  if (u) CURRENT_USER = u;
+  document.getElementById('sidebarUser').textContent = CURRENT_USER.username;
+  document.getElementById('sidebarBalance').textContent = cur() + (CURRENT_USER.balance || 0);
+  document.getElementById('topUsername').textContent = CURRENT_USER.username;
+
+  const notifs = await FS.getAll('notifications');
+  const myNotifs = notifs.filter(n => n.target === 'all' || n.target === CURRENT_USER.username);
+  const seen = parseInt(localStorage.getItem('smm_seen_notifs_v2') || '0');
+  document.getElementById('notifDot').classList.toggle('hidden', myNotifs.length <= seen);
+}
+
+window.showUP = async function(page) {
+  document.querySelectorAll('.up-nav').forEach(el => {
+    el.classList.toggle('bg-orange-50', el.dataset.up === page);
+    el.classList.toggle('text-brand', el.dataset.up === page);
+    el.classList.toggle('font-semibold', el.dataset.up === page);
+  });
+  const c = document.getElementById('upContent');
+  c.innerHTML = '<div class="text-center py-10"><i class="fas fa-spinner fa-spin text-2xl text-brand"></i></div>';
+  c.classList.remove('fade-in'); void c.offsetWidth; c.classList.add('fade-in');
+
+  if (window.innerWidth < 1024) {
+    document.getElementById('sidebar').classList.add('-translate-x-full');
+    document.getElementById('sidebarOverlay').classList.add('hidden');
+  }
+
+  // ✅ প্রতি পেজ লোডে Settings refresh করুন (Payment Numbers update এর জন্য)
+  try {
+    const s = await FS.getOne('settings', SETTINGS_ID);
+    if (s) SETTINGS = { ...SETTINGS, ...s };
+  } catch (e) { console.warn('Settings refresh failed', e); }
+
+  await refreshSidebar();
+  const pages = {
+    dashboard: upDashboard, neworder: upNewOrder, myorders: upMyOrders,
+    addfunds: upAddFunds, transactions: upTransactions, notifications: upNotifications,
+    support: upSupport, reseller: upReseller, profile: upProfile
+  };
+  await pages[page]();
+};
+
+function badge(status) {
+  const map = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    processing: 'bg-blue-100 text-blue-700',
+    completed: 'bg-emerald-100 text-emerald-700',
+    failed: 'bg-red-100 text-red-700',
+    cancelled: 'bg-slate-200 text-slate-700',
+    approved: 'bg-emerald-100 text-emerald-700',
+    rejected: 'bg-red-100 text-red-700',
+    active: 'bg-emerald-100 text-emerald-700',
+    blocked: 'bg-red-100 text-red-700',
+    open: 'bg-blue-100 text-blue-700',
+    closed: 'bg-slate-200 text-slate-600'
+  };
+  return `<span class="px-2 py-1 rounded-full text-xs font-semibold capitalize ${map[status] || 'bg-slate-100'}">${status}</span>`;
+}
+
+/* ================= PLATFORM ICONS ================= */
+const PLATFORMS = [
+  { name: 'YouTube',   icon: 'fab fa-youtube',         color: '#ff0000', category: 'YouTube' },
+  { name: 'Facebook',  icon: 'fab fa-facebook',        color: '#1877f2', category: 'Facebook' },
+  { name: 'Instagram', icon: 'fab fa-instagram',       color: '#e1306c', category: 'Instagram' },
+  { name: 'TikTok',    icon: 'fab fa-tiktok',          color: '#000000', category: 'TikTok' },
+  { name: 'Telegram',  icon: 'fab fa-telegram',        color: '#229ED9', category: 'Telegram' },
+  { name: 'Twitter/X', icon: 'fab fa-x-twitter',       color: '#000000', category: 'Twitter' },
+  { name: 'LinkedIn',  icon: 'fab fa-linkedin',        color: '#0077b5', category: 'LinkedIn' },
+  { name: 'Discord',   icon: 'fab fa-discord',         color: '#5865F2', category: 'Discord' },
+  { name: 'Spotify',   icon: 'fab fa-spotify',         color: '#1DB954', category: 'Spotify' },
+  { name: 'Twitch',    icon: 'fab fa-twitch',          color: '#9146FF', category: 'Twitch' },
+  { name: 'Shopee',    icon: 'fas fa-shopping-bag',    color: '#EE4D2D', category: 'Shopee' },
+  { name: 'Website',   icon: 'fas fa-globe',           color: '#10b981', category: 'Website' }
+];
+
+function renderPlatformGrid() {
+  return `
+    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-orange-100">
+      <div class="grid grid-cols-6 gap-2">
+        ${PLATFORMS.map(p => `
+          <button onclick="pickPlatform('${p.category}')" class="icon-btn">
+            <i class="${p.icon}" style="color: ${p.color}"></i>
+            <span>${p.name}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+window.pickPlatform = function(category) {
+  showUP('neworder');
+  setTimeout(() => {
+    const catEl = document.getElementById('orderCategory');
+    if (catEl) {
+      const opts = [...catEl.options];
+      const match = opts.find(o => o.value.toLowerCase() === category.toLowerCase());
+      if (match) {
+        catEl.value = match.value;
+        filterServices();
+        toast('📱 ' + category + ' selected');
+      } else {
+        toast('⚠️ ' + category + ' কোন service নেই');
+      }
+    }
+  }, 300);
+};
+
+/* ================= 1. DASHBOARD ================= */
+async function upDashboard() {
+  const orders = await FS.findBy('orders', 'user', CURRENT_USER.username);
+  const services = (await FS.getAll('services')).filter(s => s.status === 'active');
+  allServicesCache = services;
+
+  document.getElementById('upContent').innerHTML = `
+    ${renderPlatformGrid()}
+
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-4 mb-4 shadow-lg">
+      <div class="flex gap-3">
+        <button onclick="showUP('neworder')" class="flex-1 bg-white text-brand font-bold py-3 rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
+          🛒 New Order
+        </button>
+        <button onclick="showUP('addfunds')" class="flex-1 bg-success text-white font-bold py-3 rounded-xl hover:shadow-lg transition flex items-center justify-center gap-2">
+          💰 Add Funds
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 mb-4 shadow-sm border border-orange-100">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-slate-500">Your Balance</p>
+          <p class="text-3xl font-bold text-emerald-600 mt-1">${cur()}${CURRENT_USER.balance || 0}</p>
+        </div>
+        <div class="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center">
+          <i class="fas fa-wallet text-2xl text-emerald-600"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-orange-100 text-center">
+        <i class="fas fa-shopping-bag text-brand text-xl mb-1"></i>
+        <p class="text-xl font-bold">${orders.length}</p>
+        <p class="text-xs text-slate-500">Total</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-orange-100 text-center">
+        <i class="fas fa-clock text-yellow-500 text-xl mb-1"></i>
+        <p class="text-xl font-bold">${orders.filter(o => o.status === 'pending' || o.status === 'processing').length}</p>
+        <p class="text-xs text-slate-500">Pending</p>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border border-orange-100 text-center">
+        <i class="fas fa-check-circle text-emerald-500 text-xl mb-1"></i>
+        <p class="text-xl font-bold">${orders.filter(o => o.status === 'completed').length}</p>
+        <p class="text-xs text-slate-500">Completed</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-orange-100 mb-4">
+      <h2 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-fire text-brand"></i> Popular Services
+      </h2>
+      ${services.length ? services.slice(0, 5).map(s => `
+        <div class="flex justify-between items-center py-2 border-b last:border-0">
+          <div>
+            <p class="text-sm font-semibold text-slate-700">${s.name}</p>
+            <p class="text-xs text-slate-500">Min: ${s.min} • Max: ${s.max}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-bold text-brand">${cur()}${s.price}</p>
+            <p class="text-xs text-slate-400">per 1000</p>
+          </div>
+        </div>
+      `).join('') : '<p class="text-slate-400 text-sm text-center py-4">No services available</p>'}
+    </div>
+
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-orange-100">
+      <h2 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-history text-brand"></i> Recent Orders
+      </h2>
+      ${orders.length ? [...orders].reverse().slice(0, 5).map(o => `
+        <div class="flex justify-between items-center py-2 border-b last:border-0">
+          <div>
+            <p class="text-sm font-semibold">#${o.orderId || o.id.slice(-6)} - ${o.service}</p>
+            <p class="text-xs text-slate-500">${o.qty} pcs • ${cur()}${o.charge}</p>
+          </div>
+          ${badge(o.status)}
+        </div>
+      `).join('') : '<p class="text-slate-400 text-sm text-center py-4">No orders yet</p>'}
+    </div>
+  `;
+}
+
+/* ================= 2. NEW ORDER ================= */
+async function upNewOrder() {
+  const services = (await FS.getAll('services')).filter(s => s.status === 'active');
+  allServicesCache = services;
+  const categories = [...new Set(services.map(s => s.category))];
+
+  document.getElementById('upContent').innerHTML = `
+    ${renderPlatformGrid()}
+
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <div class="flex gap-2">
+          <button class="flex-1 bg-white text-brand font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2">
+            🛒 New Order
+          </button>
+          <button onclick="showUP('addfunds')" class="flex-1 bg-success text-white font-bold py-2.5 rounded-lg text-sm flex items-center justify-center gap-2">
+            💰 Add Funds
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4">
+        <div class="relative mb-4">
+          <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input id="orderSearch" oninput="searchServices(this.value)" 
+            placeholder="🔍 Search service (e.g. youtube, instagram)..." 
+            class="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+          <button onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-red-500 hidden" id="clearSearchBtn">
+            <i class="fas fa-times-circle text-lg"></i>
+          </button>
+        </div>
+
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Category</label>
+        <select id="orderCategory" onchange="filterServices()" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none mb-4">
+          <option value="">-- Select Category --</option>
+          ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+        </select>
+
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Service</label>
+        <select id="orderService" onchange="showServiceDetails()" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none mb-4">
+          <option value="">-- Select Category First --</option>
+        </select>
+
+        <div id="serviceDetails" class="hidden bg-orange-50 border border-orange-200 rounded-xl p-4 mb-4">
+          <div class="grid grid-cols-3 gap-3 text-sm">
+            <div>
+              <p class="text-xs text-slate-500 mb-1">Price / 1000</p>
+              <p class="font-bold text-brand" id="svcPrice">-</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-1">Min</p>
+              <p class="font-bold text-slate-800" id="svcMin">-</p>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 mb-1">Max</p>
+              <p class="font-bold text-slate-800" id="svcMax">-</p>
+            </div>
+          </div>
+        </div>
+
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Link</label>
+        <input id="orderLink" placeholder="https://instagram.com/yourpage"
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none mb-4">
+
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Quantity</label>
+        <input id="orderQty" type="number" oninput="calcCharge()"
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none mb-2">
+        <p class="text-xs text-slate-500 mb-4">Min: <span id="hintMin">100</span> - Max: <span id="hintMax">100000</span></p>
+
+        <div class="bg-slate-50 rounded-xl p-4 mb-4 flex justify-between items-center">
+          <span class="text-slate-600 font-medium">Total Charge:</span>
+          <span class="text-2xl font-bold text-brand" id="orderCharge">${cur()}0.00</span>
+        </div>
+
+        <button onclick="placeOrder()" class="w-full bg-brand-solid hover:opacity-90 text-white py-3 rounded-xl font-bold">
+          <i class="fas fa-shopping-cart mr-2"></i>Place Order
+        </button>
+        <p class="text-xs text-slate-400 text-center mt-3">Balance: <b>${cur()}${CURRENT_USER.balance || 0}</b></p>
+      </div>
+    </div>
+  `;
+}
+
+window.searchServices = function(query) {
+  const services = allServicesCache;
+  const q = (query || '').toLowerCase().trim();
+  
+  const clearBtn = document.getElementById('clearSearchBtn');
+  if (clearBtn) clearBtn.classList.toggle('hidden', !q);
+
+  const filtered = q
+    ? services.filter(s =>
+        (s.name || '').toLowerCase().includes(q) ||
+        (s.category || '').toLowerCase().includes(q)
+      )
+    : services;
+
+  const sel = document.getElementById('orderService');
+  if (!sel) return;
+
+  if (!filtered.length) {
+    sel.innerHTML = '<option value="">❌ No services found</option>';
+    document.getElementById('serviceDetails').classList.add('hidden');
+    return;
+  }
+
+  sel.innerHTML = filtered.map(s =>
+    `<option value="${s.id}">#${s.id.slice(-4)} - ${s.name} [${cur()}${s.price}]</option>`
+  ).join('');
+
+  if (filtered.length >= 1) showServiceDetails();
+};
+
+window.clearSearch = function() {
+  const input = document.getElementById('orderSearch');
+  if (input) input.value = '';
+  searchServices('');
+  document.getElementById('orderCategory').value = '';
+  document.getElementById('orderService').innerHTML = '<option value="">-- Select Category First --</option>';
+  document.getElementById('serviceDetails').classList.add('hidden');
+};
+
+window.filterServices = async function() {
+  const cat = document.getElementById('orderCategory').value;
+  const searchInput = document.getElementById('orderSearch');
+  if (searchInput) searchInput.value = '';
+  const clearBtn = document.getElementById('clearSearchBtn');
+  if (clearBtn) clearBtn.classList.add('hidden');
+
+  const services = allServicesCache.filter(s => !cat || s.category === cat);
+  const sel = document.getElementById('orderService');
+  
+  if (!cat) {
+    sel.innerHTML = '<option value="">-- Select Category First --</option>';
+    document.getElementById('serviceDetails').classList.add('hidden');
+    return;
+  }
+
+  sel.innerHTML = services.length
+    ? services.map(s => `<option value="${s.id}">#${s.id.slice(-4)} - ${s.name} [${cur()}${s.price}]</option>`).join('')
+    : '<option value="">No services in this category</option>';
+  showServiceDetails();
+};
+
+window.showServiceDetails = async function() {
+  const id = document.getElementById('orderService').value;
+  if (!id) return document.getElementById('serviceDetails').classList.add('hidden');
+  const s = await FS.getOne('services', id);
+  if (!s) return;
+  document.getElementById('serviceDetails').classList.remove('hidden');
+  document.getElementById('svcPrice').textContent = cur() + s.price;
+  document.getElementById('svcMin').textContent = s.min;
+  document.getElementById('svcMax').textContent = s.max;
+  document.getElementById('hintMin').textContent = s.min;
+  document.getElementById('hintMax').textContent = s.max;
+  calcCharge();
+};
+
+window.calcCharge = async function() {
+  const id = document.getElementById('orderService').value;
+  if (!id) return;
+  const s = await FS.getOne('services', id);
+  const qty = parseInt(document.getElementById('orderQty').value) || 0;
+  const charge = s ? (qty / 1000) * s.price : 0;
+  document.getElementById('orderCharge').textContent = cur() + charge.toFixed(2);
+};
+
+window.placeOrder = async function() {
+  const id = document.getElementById('orderService').value;
+  if (!id) return toast('❌ Select a service!');
+  const s = await FS.getOne('services', id);
+  const link = document.getElementById('orderLink').value.trim();
+  const qty = parseInt(document.getElementById('orderQty').value) || 0;
+
+  if (!link) return toast('❌ Link required!');
+  if (qty < s.min || qty > s.max) return toast(`❌ Quantity ${s.min}-${s.max}!`);
+
+  const charge = (qty / 1000) * s.price;
+  if (charge > (CURRENT_USER.balance || 0)) return toast('❌ Insufficient balance!');
+
+  try {
+    await FS.update('users', CURRENT_USER.id, { balance: (CURRENT_USER.balance || 0) - charge });
+    CURRENT_USER.balance = (CURRENT_USER.balance || 0) - charge;
+
+    const orderId = 'ord_' + Date.now();
+    const orderNum = 1000 + Math.floor(Math.random() * 9000);
+    await FS.set('orders', orderId, {
+      orderId: orderNum,
+      user: CURRENT_USER.username,
+      userId: CURRENT_USER.id,
+      service: s.name,
+      serviceId: s.id,
+      link, qty,
+      charge: parseFloat(charge.toFixed(2)),
+      status: 'pending',
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: Date.now()
+    });
+
+    toast(`✅ Order #${orderNum} placed!`);
+    showUP('myorders');
+  } catch (err) {
+    toast('❌ ' + err.message);
+  }
+};
+
+/* ================= 3. MY ORDERS ================= */
+async function upMyOrders() {
+  const orders = (await FS.findBy('orders', 'user', CURRENT_USER.username)).reverse();
+
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-box mr-2"></i>My Orders</h1>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-orange-50 text-slate-600">
+            <tr>
+              <th class="text-left p-3">Order ID</th>
+              <th class="text-left p-3">Service</th>
+              <th class="text-left p-3">Qty</th>
+              <th class="text-left p-3">Charge</th>
+              <th class="text-left p-3">Status</th>
+              <th class="text-left p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orders.length ? orders.map(o => `
+              <tr class="border-t hover:bg-orange-50">
+                <td class="p-3 font-semibold">#${o.orderId || o.id.slice(-6)}</td>
+                <td class="p-3">${o.service}</td>
+                <td class="p-3">${o.qty}</td>
+                <td class="p-3 font-semibold">${cur()}${o.charge}</td>
+                <td class="p-3">${badge(o.status)}</td>
+                <td class="p-3"><button onclick="orderDetails('${o.id}')" class="text-brand hover:underline text-xs">View</button></td>
+              </tr>
+            `).join('') : `<tr><td colspan="6" class="p-8 text-center text-slate-400">No orders yet</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+window.orderDetails = async function(id) {
+  const o = await FS.getOne('orders', id);
+  openModal(`
+    <div class="p-6">
+      <h2 class="text-xl font-bold mb-4"><i class="fas fa-receipt text-brand mr-2"></i>Order #${o.orderId || o.id.slice(-6)}</h2>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-slate-50 p-3 rounded"><p class="text-xs text-slate-500">Service</p><p class="font-semibold">${o.service}</p></div>
+        <div class="bg-slate-50 p-3 rounded"><p class="text-xs text-slate-500">Status</p>${badge(o.status)}</div>
+        <div class="bg-slate-50 p-3 rounded"><p class="text-xs text-slate-500">Quantity</p><p class="font-semibold">${o.qty}</p></div>
+        <div class="bg-slate-50 p-3 rounded"><p class="text-xs text-slate-500">Charge</p><p class="font-semibold">${cur()}${o.charge}</p></div>
+        <div class="bg-slate-50 p-3 rounded col-span-2"><p class="text-xs text-slate-500">Link</p><a href="${o.link}" target="_blank" class="text-brand hover:underline text-sm break-all">${o.link}</a></div>
+        <div class="bg-slate-50 p-3 rounded col-span-2"><p class="text-xs text-slate-500">Date</p><p class="font-semibold">${o.date}</p></div>
+      </div>
+      <button onclick="closeModal()" class="w-full bg-slate-800 text-white py-2 rounded-lg">Close</button>
+    </div>
+  `);
+};
+
+/* ================= 4. ADD FUNDS (✅ Admin-controlled) ================= */
+function upAddFunds() {
+  // ✅ SETTINGS থেকে Payment নাম্বার লোড হচ্ছে — Admin Panel থেকে এডিট করলে instant change হবে
+  const bkashNum = SETTINGS.bkash || '—';
+  const nagadNum = SETTINGS.nagad || '—';
+  const rocketNum = SETTINGS.rocket || '—';
+  const instruction = SETTINGS.instruction || `শুধুমাত্র ${bkashNum} নাম্বারে Send Money করুন।`;
+
+  const methods = [
+    { name: 'bKash',  number: bkashNum,  type: 'Personal' },
+    { name: 'Nagad',  number: nagadNum,  type: 'Personal' },
+    { name: 'Rocket', number: rocketNum, type: 'Personal' }
+  ].filter(m => m.number && m.number !== '—');
+
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden max-w-2xl">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-wallet mr-2"></i>Add Funds</h1>
+      </div>
+      <div class="p-5">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
+          <p class="text-sm text-emerald-700">Current Balance</p>
+          <p class="text-3xl font-bold text-emerald-600">${cur()}${CURRENT_USER.balance || 0}</p>
+        </div>
+
+        <div class="bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-4 mb-5">
+          <h3 class="font-bold text-amber-800 mb-3"><i class="fas fa-info-circle mr-1"></i>💳 Deposit Instructions</h3>
+          <p class="text-sm text-amber-700 mb-3">নিচের নাম্বারে <b>Send Money</b> করুন:</p>
+          <div class="space-y-2">
+            ${methods.length ? methods.map(m => `
+              <div class="flex justify-between items-center bg-white rounded-lg px-3 py-2 border border-amber-200">
+                <div>
+                  <span class="font-semibold text-slate-700 text-sm">${m.name}</span>
+                  <span class="text-xs text-slate-400 ml-2">(${m.type})</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <code class="bg-yellow-100 px-2 py-1 rounded text-sm font-bold text-amber-800">${m.number}</code>
+                  <button type="button" onclick="copyNumber('${m.number}')" class="text-brand text-xs"><i class="fas fa-copy"></i></button>
+                </div>
+              </div>
+            `).join('') : `<div class="text-center text-amber-600 text-sm py-4">⚠️ Admin এখনো Payment নাম্বার সেট করেননি</div>`}
+          </div>
+          ${instruction ? `
+            <div class="mt-3 bg-red-50 border border-red-200 rounded-lg p-3">
+              <p class="text-xs text-red-700"><i class="fas fa-exclamation-triangle mr-1"></i><b>${instruction}</b></p>
+            </div>
+          ` : ''}
+        </div>
+
+        <form onsubmit="submitDeposit(event)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold mb-2">Payment Method</label>
+            <select name="method" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+              ${methods.length
+                ? methods.map(m => `<option value="${m.name}">${m.name}</option>`).join('')
+                : '<option value="">No methods available</option>'}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2">Amount (${cur()})</label>
+            <input name="amount" type="number" min="50" required placeholder="Minimum 50"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2">Transaction ID (TXN)</label>
+            <input name="txn" required placeholder="Transaction ID"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold mb-2">Sender Number</label>
+            <input name="sender" required placeholder="01XXXXXXXXX"
+              class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+          </div>
+          <button type="submit" class="w-full bg-brand-solid hover:opacity-90 text-white py-3 rounded-xl font-bold">
+            <i class="fas fa-paper-plane mr-2"></i>Submit Deposit Request
+          </button>
+        </form>
+      </div>
+    </div>
+  `;
+}
+
+window.copyNumber = function(num) {
+  const el = document.createElement('textarea');
+  el.value = num;
+  document.body.appendChild(el);
+  el.select();
+  document.execCommand('copy');
+  document.body.removeChild(el);
+  toast('📋 Copied: ' + num);
+};
+
+window.submitDeposit = async function(e) {
+  e.preventDefault();
+  const f = e.target;
+  try {
+    const payId = 'pay_' + Date.now();
+    const payNum = 500 + Math.floor(Math.random() * 500);
+    await FS.set('payments', payId, {
+      payId: payNum,
+      user: CURRENT_USER.username,
+      userId: CURRENT_USER.id,
+      method: f.method.value,
+      txn: f.txn.value,
+      sender: f.sender.value,
+      amount: parseFloat(f.amount.value),
+      status: 'pending',
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: Date.now()
+    });
+    toast(`✅ Deposit request #${payNum} submitted!`);
+    showUP('transactions');
+  } catch (err) {
+    toast('❌ ' + err.message);
+  }
+};
+
+/* ================= 5. TRANSACTIONS ================= */
+async function upTransactions() {
+  const payments = (await FS.findBy('payments', 'user', CURRENT_USER.username)).reverse();
+  const orders = (await FS.findBy('orders', 'user', CURRENT_USER.username)).reverse();
+
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden mb-4">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-credit-card mr-2"></i>Transactions</h1>
+      </div>
+      <div class="p-4">
+        <h2 class="font-bold text-slate-700 mb-3">💰 Deposit History</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-orange-50 text-slate-600">
+              <tr><th class="text-left p-3">ID</th><th class="text-left p-3">Method</th><th class="text-left p-3">TXN</th><th class="text-left p-3">Amount</th><th class="text-left p-3">Status</th></tr>
+            </thead>
+            <tbody>
+              ${payments.map(p => `
+                <tr class="border-t">
+                  <td class="p-3">#${p.payId || p.id.slice(-6)}</td>
+                  <td class="p-3">${p.method}</td>
+                  <td class="p-3 text-slate-500 text-xs">${p.txn}</td>
+                  <td class="p-3 font-semibold">${cur()}${p.amount}</td>
+                  <td class="p-3">${badge(p.status)}</td>
+                </tr>
+              `).join('') || `<tr><td colspan="5" class="p-6 text-center text-slate-400">No deposits</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+
+        <h2 class="font-bold text-slate-700 mt-6 mb-3">🛒 Order Payments</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-orange-50 text-slate-600">
+              <tr><th class="text-left p-3">Order</th><th class="text-left p-3">Service</th><th class="text-left p-3">Amount</th><th class="text-left p-3">Status</th></tr>
+            </thead>
+            <tbody>
+              ${orders.map(o => `
+                <tr class="border-t">
+                  <td class="p-3 font-semibold">#${o.orderId || o.id.slice(-6)}</td>
+                  <td class="p-3">${o.service}</td>
+                  <td class="p-3 font-semibold text-red-600">-${cur()}${o.charge}</td>
+                  <td class="p-3">${badge(o.status)}</td>
+                </tr>
+              `).join('') || `<tr><td colspan="4" class="p-6 text-center text-slate-400">No orders</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ================= 6. NOTIFICATIONS ================= */
+async function upNotifications() {
+  const notifs = (await FS.getAll('notifications'))
+    .filter(n => n.target === 'all' || n.target === CURRENT_USER.username)
+    .reverse();
+  localStorage.setItem('smm_seen_notifs_v2', notifs.length);
+  document.getElementById('notifDot').classList.add('hidden');
+
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-bell mr-2"></i>Notifications</h1>
+      </div>
+      <div class="p-4 space-y-3">
+        ${notifs.length ? notifs.map(n => `
+          <div class="bg-orange-50 rounded-xl p-4 border-l-4 border-brand">
+            <div class="flex justify-between items-start mb-1">
+              <h3 class="font-bold text-slate-800">${n.title}</h3>
+              <span class="text-xs text-slate-400">${n.date}</span>
+            </div>
+            <p class="text-slate-600 text-sm">${n.message}</p>
+            <p class="text-xs text-brand mt-2"><i class="fas fa-user-shield mr-1"></i>Admin</p>
+          </div>
+        `).join('') : '<p class="text-center text-slate-400 py-8">No notifications</p>'}
+      </div>
+    </div>
+  `;
+}
+
+/* ================= 7. SUPPORT ================= */
+async function upSupport() {
+  const tickets = (await FS.findBy('tickets', 'user', CURRENT_USER.username)).reverse();
+
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4 flex justify-between items-center">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-ticket-alt mr-2"></i>Support</h1>
+        <button onclick="newTicketForm()" class="bg-white text-brand font-bold px-4 py-2 rounded-lg text-sm">
+          <i class="fas fa-plus mr-1"></i>New
+        </button>
+      </div>
+      <div class="p-4">
+        ${tickets.length ? `
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-orange-50 text-slate-600">
+                <tr><th class="text-left p-3">ID</th><th class="text-left p-3">Subject</th><th class="text-left p-3">Status</th><th class="text-left p-3">Action</th></tr>
+              </thead>
+              <tbody>
+                ${tickets.map(t => `
+                  <tr class="border-t hover:bg-orange-50">
+                    <td class="p-3">#${t.ticketId || t.id.slice(-6)}</td>
+                    <td class="p-3 font-semibold">${t.subject}</td>
+                    <td class="p-3">${badge(t.status)}</td>
+                    <td class="p-3"><button onclick="userViewTicket('${t.id}')" class="text-brand hover:underline text-xs">View</button></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : '<p class="text-center text-slate-400 py-8">No tickets</p>'}
+      </div>
+    </div>
+  `;
+}
+
+window.newTicketForm = function() {
+  openModal(`
+    <div class="p-6">
+      <h2 class="text-xl font-bold mb-4 text-brand">Create New Ticket</h2>
+      <form onsubmit="createTicket(event)" class="space-y-3">
+        <input name="subject" placeholder="Subject" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+        <textarea name="msg" placeholder="Describe your issue..." required rows="4" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none"></textarea>
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 bg-brand-solid text-white py-3 rounded-xl font-bold">Submit</button>
+          <button type="button" onclick="closeModal()" class="flex-1 bg-slate-200 py-3 rounded-xl font-bold">Cancel</button>
+        </div>
+      </form>
+    </div>
+  `);
+};
+
+window.createTicket = async function(e) {
+  e.preventDefault();
+  try {
+    const ticketId = 'tkt_' + Date.now();
+    const ticketNum = Math.floor(Math.random() * 9000) + 1000;
+    await FS.set('tickets', ticketId, {
+      ticketId: ticketNum,
+      user: CURRENT_USER.username,
+      userId: CURRENT_USER.id,
+      subject: e.target.subject.value,
+      status: 'open',
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: Date.now(),
+      replies: [{ sender: 'user', msg: e.target.msg.value, time: new Date().toLocaleTimeString() }]
+    });
+    toast('✅ Ticket created!');
+    closeModal();
+    upSupport();
+  } catch (err) {
+    toast('❌ ' + err.message);
+  }
+};
+
+window.userViewTicket = async function(id) {
+  const t = await FS.getOne('tickets', id);
+  const replies = t.replies || [];
+  openModal(`
+    <div class="p-6">
+      <h2 class="text-xl font-bold mb-1 text-brand">#${t.ticketId || id.slice(-6)} - ${t.subject}</h2>
+      <p class="text-sm text-slate-500 mb-4">${badge(t.status)}</p>
+      <div class="bg-slate-50 rounded-xl p-3 max-h-64 overflow-y-auto mb-4 space-y-3">
+        ${replies.map(r => `
+          <div class="${r.sender === 'user' ? 'text-right' : ''}">
+            <span class="inline-block px-3 py-2 rounded-lg text-sm ${r.sender === 'user' ? 'bg-brand-solid text-white' : 'bg-white border'}">
+              <b>${r.sender === 'admin' ? 'Admin' : 'You'}:</b> ${r.msg}
+            </span>
+            <p class="text-xs text-slate-400 mt-1">${r.time}</p>
+          </div>
+        `).join('')}
+      </div>
+      ${t.status === 'open' ? `
+        <form onsubmit="userReplyTicket(event, '${t.id}')">
+          <textarea name="msg" placeholder="Reply..." required rows="3" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none mb-2"></textarea>
+          <button type="submit" class="w-full bg-brand-solid text-white py-3 rounded-xl font-bold">Send</button>
+        </form>
+      ` : '<p class="text-center text-slate-400 py-2">🔒 Ticket closed</p>'}
+      <button onclick="closeModal()" class="mt-3 w-full bg-slate-200 py-2 rounded-lg">Close</button>
+    </div>
+  `);
+};
+
+window.userReplyTicket = async function(e, id) {
+  e.preventDefault();
+  const t = await FS.getOne('tickets', id);
+  const replies = t.replies || [];
+  replies.push({ sender: 'user', msg: e.target.msg.value, time: new Date().toLocaleTimeString() });
+  await FS.update('tickets', id, { replies });
+  toast('✅ Reply sent!');
+  userViewTicket(id);
+};
+
+/* ================= 8. RESELLER ================= */
+async function upReseller() {
+  const isReseller = CURRENT_USER.reseller;
+  const services = await FS.getAll('services');
+
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden mb-4">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-handshake mr-2"></i>Reseller</h1>
+      </div>
+      <div class="p-5">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <p class="text-sm text-slate-500">Status</p>
+            <p class="text-2xl font-bold ${isReseller ? 'text-emerald-600' : 'text-slate-400'} mt-1">
+              ${isReseller ? '✅ Active' : '❌ Inactive'}
+            </p>
+          </div>
+          ${!isReseller ? `<button onclick="applyReseller()" class="bg-brand-solid text-white px-5 py-2 rounded-lg font-bold">Apply Now</button>` : ''}
+        </div>
+
+        ${isReseller ? `
+          <div class="bg-orange-50 rounded-xl p-4 mb-4">
+            <h2 class="font-bold text-slate-700 mb-2"><i class="fas fa-key text-brand mr-2"></i>Your API Key</h2>
+            <div class="flex gap-2">
+              <input readonly value="${CURRENT_USER.api_key || ''}" id="apiKeyField" class="flex-1 px-3 py-2 bg-white border border-orange-200 rounded-lg font-mono text-sm">
+              <button onclick="copyApiKey()" class="bg-brand-solid text-white px-4 rounded-lg"><i class="fas fa-copy"></i></button>
+              <button onclick="regenApiKey()" class="bg-amber-500 text-white px-4 rounded-lg"><i class="fas fa-sync"></i></button>
+            </div>
+          </div>
+
+          <div class="bg-white border border-orange-200 rounded-xl p-4">
+            <h2 class="font-bold text-slate-700 mb-3"><i class="fas fa-tags text-brand mr-2"></i>Reseller Pricing (15% OFF)</h2>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-orange-50">
+                  <tr><th class="text-left p-2">Service</th><th class="text-left p-2">Regular</th><th class="text-left p-2">Your Price</th></tr>
+                </thead>
+                <tbody>
+                  ${services.slice(0,10).map(s => `
+                    <tr class="border-t">
+                      <td class="p-2">${s.name}</td>
+                      <td class="p-2 text-slate-400 line-through">${cur()}${s.price}</td>
+                      <td class="p-2 font-bold text-emerald-600">${cur()}${(s.price * 0.85).toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ` : `
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-6 text-center">
+            <i class="fas fa-rocket text-brand text-4xl mb-3"></i>
+            <h2 class="font-bold text-lg text-slate-800 mb-2">Become a Reseller</h2>
+            <p class="text-slate-600 text-sm mb-4">15% discount + API access</p>
+            <button onclick="applyReseller()" class="bg-brand-solid text-white px-6 py-2 rounded-lg font-bold">Apply Now</button>
+          </div>
+        `}
+      </div>
+    </div>
+  `;
+}
+
+window.applyReseller = async function() {
+  if (!confirm('Reseller হতে চান?')) return;
+  const apiKey = 'API-' + CURRENT_USER.username.toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  await FS.update('users', CURRENT_USER.id, { reseller: true, api_key: apiKey });
+  CURRENT_USER.reseller = true;
+  CURRENT_USER.api_key = apiKey;
+  toast('✅ Reseller activated!');
+  upReseller();
+};
+
+window.copyApiKey = function() {
+  const field = document.getElementById('apiKeyField');
+  field.select();
+  document.execCommand('copy');
+  toast('📋 API Key copied!');
+};
+
+window.regenApiKey = async function() {
+  if (!confirm('নতুন API Key?')) return;
+  const apiKey = 'API-' + CURRENT_USER.username.toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+  await FS.update('users', CURRENT_USER.id, { api_key: apiKey });
+  CURRENT_USER.api_key = apiKey;
+  toast('🔄 API Key regenerated!');
+  upReseller();
+};
+
+/* ================= 9. PROFILE ================= */
+async function upProfile() {
+  document.getElementById('upContent').innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 p-4">
+        <h1 class="text-white font-bold text-lg"><i class="fas fa-user-circle mr-2"></i>Profile</h1>
+      </div>
+      <div class="p-5">
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <h2 class="font-bold text-slate-700 mb-3"><i class="fas fa-id-card text-brand mr-2"></i>Account Info</h2>
+            <div class="space-y-3">
+              <div class="bg-orange-50 p-3 rounded-xl"><p class="text-xs text-slate-500">Username</p><p class="font-semibold">${CURRENT_USER.username}</p></div>
+              <div class="bg-orange-50 p-3 rounded-xl"><p class="text-xs text-slate-500">Email</p><p class="font-semibold">${CURRENT_USER.email}</p></div>
+              <div class="bg-orange-50 p-3 rounded-xl"><p class="text-xs text-slate-500">Balance</p><p class="font-semibold text-emerald-600">${cur()}${CURRENT_USER.balance || 0}</p></div>
+              <div class="bg-orange-50 p-3 rounded-xl"><p class="text-xs text-slate-500">Joined</p><p class="font-semibold">${CURRENT_USER.joined}</p></div>
+            </div>
+          </div>
+
+          <div>
+            <h2 class="font-bold text-slate-700 mb-3"><i class="fas fa-lock text-brand mr-2"></i>Change Password</h2>
+            <form onsubmit="changePassword(event)" class="space-y-3">
+              <input name="old" type="password" placeholder="Current Password" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+              <input name="new1" type="password" placeholder="New Password" required minlength="6" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+              <input name="new2" type="password" placeholder="Confirm Password" required minlength="6" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-brand focus:outline-none">
+              <button type="submit" class="w-full bg-brand-solid text-white py-3 rounded-xl font-bold">Update Password</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+          <h2 class="font-bold text-red-700 mb-2"><i class="fas fa-sign-out-alt mr-2"></i>Logout</h2>
+          <button onclick="userLogout()" class="bg-red-600 text-white px-5 py-2 rounded-lg font-bold mt-2">Logout</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.changePassword = async function(e) {
+  e.preventDefault();
+  const f = e.target;
+  if (CURRENT_USER.password !== f.old.value) return toast('❌ Current password wrong!');
+  if (f.new1.value !== f.new2.value) return toast('❌ Passwords do not match!');
+  await FS.update('users', CURRENT_USER.id, { password: f.new1.value });
+  CURRENT_USER.password = f.new1.value;
+  toast('✅ Password updated!');
+  f.reset();
+};
+
+window.openModal = function(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modal').classList.remove('hidden');
+};
+window.closeModal = function() {
+  document.getElementById('modal').classList.add('hidden');
+};
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target.id === 'modal') closeModal();
+});
+
+window.showForgot = function(e) { e.preventDefault(); switchAuth('forgot'); };
+
+init();
+</script>
+</body>
+</html>
